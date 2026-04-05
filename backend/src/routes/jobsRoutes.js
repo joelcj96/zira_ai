@@ -500,17 +500,21 @@ router.get("/", protect, async (req, res, next) => {
       const topMatch = jobsForPlan[0];
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
-      const alreadyNotified = await Notification.exists({
-        user: req.user._id,
-        type: "job_match",
-        createdAt: { $gte: todayStart }
-      });
-      if (!alreadyNotified) {
-        await Notification.create({
+      try {
+        const alreadyNotified = await Notification.exists({
           user: req.user._id,
-          message: `New top match: ${topMatch.title} at ${topMatch.company}`,
-          type: "job_match"
+          type: "job_match",
+          createdAt: { $gte: todayStart }
         });
+        if (!alreadyNotified) {
+          await Notification.create({
+            user: req.user._id,
+            message: `New top match: ${topMatch.title} at ${topMatch.company}`,
+            type: "job_match"
+          });
+        }
+      } catch (error) {
+        console.error("jobs feed: notification side effect failed", error?.message || error);
       }
     }
 

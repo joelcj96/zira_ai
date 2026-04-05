@@ -32,6 +32,18 @@ const tokenize = (text = "") =>
 
 const toPercent = (value) => Math.max(0, Math.min(100, Math.round(value)));
 
+const DEFAULT_BEHAVIOR_PROFILE = {
+  totalEvents: 0,
+  clickedCount: 0,
+  appliedCount: 0,
+  ignoredCount: 0,
+  preferredBudgetLevel: null,
+  preferredLocations: [],
+  preferredSkills: [],
+  ignoredTitleKeywords: [],
+  toneHint: "professional"
+};
+
 const getMatchedSkillStats = (job, user) => {
   const requiredSkills = Array.isArray(job.skillsRequired) ? job.skillsRequired : [];
   const normalizedUserSkills = getStructuredSkills(user).map((item) => normalize(item));
@@ -80,8 +92,15 @@ const computeSuccessPatternScore = (job, keywordProfile) => {
 };
 
 export const rankJobsSmart = async (jobs, user) => {
-  const behaviorProfile = await getUserBehaviorProfile(user._id);
-  const successKeywordProfile = await buildSuccessKeywordProfile(user._id);
+  const behaviorProfile = await getUserBehaviorProfile(user._id).catch((error) => {
+    console.error("rankJobsSmart: failed to load behavior profile", error?.message || error);
+    return DEFAULT_BEHAVIOR_PROFILE;
+  });
+
+  const successKeywordProfile = await buildSuccessKeywordProfile(user._id).catch((error) => {
+    console.error("rankJobsSmart: failed to build success keyword profile", error?.message || error);
+    return {};
+  });
 
   const ranked = jobs
     .map((job) => {
