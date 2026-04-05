@@ -9,9 +9,10 @@ export const connectDB = async () => {
 
   await mongoose.connect(mongoUri, {
     autoIndex: false,
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 30000,
+    serverSelectionTimeoutMS: 20000,
+    socketTimeoutMS: 45000,
     bufferCommands: true,
+    maxPoolSize: 1,
   });
   console.log("MongoDB connected");
 };
