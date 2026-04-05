@@ -1,5 +1,4 @@
 import mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
 
 const SKILL_KEYWORDS = [
   "react",
@@ -91,6 +90,7 @@ export const extractCvText = async ({ buffer, mimetype, originalname = "" }) => 
   const lowerName = originalname.toLowerCase();
 
   if (mimetype === "application/pdf" || lowerName.endsWith(".pdf")) {
+    const { PDFParse } = await import("pdf-parse");
     const parser = new PDFParse({ data: buffer });
     const result = await parser.getText();
     await parser.destroy();
