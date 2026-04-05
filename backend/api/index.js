@@ -1,3 +1,4 @@
+import "./polyfill.js";
 import mongoose from "mongoose";
 import { connectDB } from "../src/config/db.js";
 import app from "../src/app.js";
