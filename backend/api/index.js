@@ -2,9 +2,19 @@ import "./polyfill.js";
 import { connectDB } from "../src/config/db.js";
 import app from "../src/app.js";
 
-// Fire DB connection immediately at module load.
-// Mongoose buffers all model operations until the connection is established,
-// so requests don't need to wait — the first real DB query will just queue.
-connectDB().catch((err) => console.error("MongoDB connection error:", err));
+// Cache the connection promise so we only connect once per container lifetime.
+let connectionPromise = null;
 
-export default app;
+const handler = async (req, res) => {
+  if (!connectionPromise) {
+    connectionPromise = connectDB().catch((err) => {
+      console.error("MongoDB connection error:", err);
+      connectionPromise = null; // allow retry on next request
+      throw err;
+    });
+  }
+  await connectionPromise;
+  return app(req, res);
+};
+
+export default handler;

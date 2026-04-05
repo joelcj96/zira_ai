@@ -8,7 +8,10 @@ export const connectDB = async () => {
   }
 
   await mongoose.connect(mongoUri, {
-    autoIndex: false
+    autoIndex: false,
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 30000,
+    bufferCommands: true,
   });
   console.log("MongoDB connected");
 };
